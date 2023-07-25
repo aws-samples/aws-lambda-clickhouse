@@ -14,7 +14,7 @@
     "build:app": "esbuild src/app.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/app.js"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.358.0",
+    "@aws-sdk/client-s3": "^3.374.0",
     "@types/aws-lambda": "^8.10.117",
     "@types/jest": "^29.5.1",
     "@types/node": "20.1.7",
