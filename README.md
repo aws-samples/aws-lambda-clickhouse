@@ -134,10 +134,10 @@ The cost to deploy the sample and run several queries on provided test data shou
 ## Q: How to make clickhouse binary run (better) in AWS Lambda?
 Apply a [patch](https://github.com/ClickHouse/ClickHouse/issues/29378#issuecomment-962241595), make it not self-extractable, build only what's neccessary (basically, -DENABLE_CLICKHOUSE_LOCAL=ON) to reduce size - not strictly required.
 
-## Security
+# Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
 
-## License
+# License
 
 This sample is licensed under the MIT-0 License. See the LICENSE file.
