@@ -53,22 +53,22 @@ Check the [guide](#issue-queries) for more querying options.
 
 The sample includes a Lambda Function with the Lambda Function URL enabled, an IAM user identity policy, a Lambda function execution role, and an S3 bucket.
 
-The Lambda function processes HTTP requests and runs ClickHouse binary. It has 2048MB memory by default. The memory size can be increased up to 10240 MB. More memory can improve query performance, but also increases cost. The Lambda code is deployed using container image, because of clickhouse binary size. We use a standard clickhouse binary, see [the docs](#q-how-to-make-clickhouse-binary-run-better-in-aws-lambda) for ideas how to optimize it for the AWS Lambda environment.
+**The Lambda function** processes HTTP requests and runs ClickHouse binary. It has 2048MB memory by default. The memory size can be increased up to 10240 MB. More memory can improve query performance, but also increases cost. The Lambda code is deployed using container image, because of clickhouse binary size. We use a standard clickhouse binary, see [the docs](#q-how-to-make-clickhouse-binary-run-better-in-aws-lambda) for ideas how to optimize it for the AWS Lambda environment.
 
-Data resides in the S3 bucket. You can upload any additional data in formats, supported by ClickHouse (parquet, json, csv and [many others](https://clickhouse.com/docs/en/interfaces/formats)).
+Data resides in the **S3 bucket**. You can upload any additional data in formats, supported by ClickHouse (parquet, json, csv and [many others](https://clickhouse.com/docs/en/interfaces/formats)).
 
-The Lambda function URL provides an easy way to invoke Lambda function without Amazon API Gateway. It uses AWS_IAM auth type, so all requests need to be signed with AWS Signature Version 4. You could change it to NONE to disable auth on the Lambda function URL side completely (this might impose a security risk!) or implement authentication of your choice in the Lambda code, through Amazon API Gateway or Amazon CloudFront.
+**The Lambda function URL** provides an easy way to invoke Lambda function without Amazon API Gateway. It uses AWS_IAM auth type, so all requests need to be signed with AWS Signature Version 4. You could change it to NONE to disable auth on the Lambda function URL side completely (this might impose a security risk!) or implement authentication of your choice in the Lambda code, through Amazon API Gateway or Amazon CloudFront.
 
-Permissions to invoke the Lambda function URL are granted through the IAM user identity policy. The sample grants access to only one user specified during deployment through the IAM_USER environmental variable. Another way to grant access is through the Lambda function's resource policy.
+Permissions to invoke the Lambda function URL are granted through the **IAM user identity policy**. The sample grants access to only one user specified during deployment through the IAM_USER environmental variable. Another way to grant access is through the Lambda function's resource policy.
 
-Lambda execution role provides the Lambda function with access to S3 data. This sample allows read access to one bucket only (specified during deployment). You can modify role's policies to allow more buckets. Note, that access to S3 is controlled completely by this role. Any IAM user that is allowed to make requests to the Lambda function URL will be able to query data regardless of their S3 permissions. You can build a solution around [Amazon S3 Object Lambda](https://aws.amazon.com/s3/features/object-lambda/) instead of the regular Lambda if you need to control access based on users' existing S3 permissions.
+**Lambda execution role** provides the Lambda function with access to S3 data. This sample allows read access to one bucket only (specified during deployment). You can modify role's policies to allow more buckets. Note, that access to S3 is controlled completely by this role. Any IAM user that is allowed to make requests to the Lambda function URL will be able to query data regardless of their S3 permissions. You can build a solution around [Amazon S3 Object Lambda](https://aws.amazon.com/s3/features/object-lambda/) instead of the regular Lambda if you need to control access based on users' existing S3 permissions.
 
 # User guide
 
 ## Query existing S3 bucket
 To query your real data you can either upload it to the sample S3 bucket or connect your existing S3 bucket during deployment .
 
-To connect an existing S3 bucket instead of creating a new one set `CREATE_BUCKET` environmental variable to `false`, and `BUCKET_NAME` to your bucket name (just a name, without s3:// or https://) during CDK deployment. The bucket must be in the same AWS region where the sample is deployed.
+To connect an existing S3 bucket instead of creating a new one set `CREATE_BUCKET` environmental variable to `false`, and `BUCKET_NAME` to your bucket name (just a name, without s3:// or https://) during the CDK stack deployment. The bucket must be in the same AWS region where the sample is deployed.
 
 Alternatively, you can simply upload your own data in json, parquet, csv or [another supported format](https://clickhouse.com/docs/en/interfaces/formats) to the sample bucket. Get the bucket name from `ClickhouseBucketName` AWS CDK output.
 
@@ -80,7 +80,7 @@ The URL format is:
 ```
 https://<your Lambda endpoint>/<your s3 bucket>/<object key>
 ```
-You can also omit the bucket name, then the bucket created or specified during the sample deployment will be used:
+You can also omit the bucket name, then the bucket created or specified during the deployment will be used:
 ```
 https://<your Lambda endpoint>/<object key>
 ```
@@ -103,7 +103,7 @@ This version has the following limitations that we plan to address in future:
 # FAQ
 
 ## Q: Why use this instead of [clickhouse-local](https://clickhouse.com/docs/en/operations/utilities/clickhouse-local)?
-The main difference from clickhouse-local is that the sample does not run clickhouse query engine on the client device and does not transfer source data from the S3 bucket to the client. That's why some interesting use-cases for the sample are:
+The main difference from clickhouse-local is that the sample does not run clickhouse query engine on the client device and does not transfer raw data from the S3 bucket to the client. That's why some interesting use-cases for the sample are:
 - Slow client devices. AWS Lambda [supports](https://aws.amazon.com/about-aws/whats-new/2020/12/aws-lambda-supports-10gb-memory-6-vcpu-cores-lambda-functions/) up to 10 GB of memory and 6 vCPU, which is more than an entry-level laptop might have.
 - Mobile devices. You can query massive data in S3 from mobile devices using HTTPS client applications or web clients like postman.
 - Slow network connection. AWS Lambda runs close to you data stored in S3. Only query results will be transferred to the client. That's why it can run queries faster than clickhouse-local and save traffic. 
@@ -123,7 +123,7 @@ You pay for:
 1. [S3 GET requests](https://aws.amazon.com/s3/pricing/). Data transfer between a Lambda function and Amazon Simple Storage Service (S3) within the same AWS Region is free.
 1. [Data Transfer Out](https://aws.amazon.com/ec2/pricing/on-demand/#Data_Transfer) from AWS Lambda to the client. This includes only query execution results, but not the source data.
 
-The overall price depends on the volume of data, the number and type of queries. What's important, there's no other cost besides S3 storage when no queries are run.
+The overall price depends on the volume of data, the number and type of queries. What's important, there are no other costs besides S3 storage when no queries are run.
 
 The cost to deploy the sample and run several queries on provided test data should be under 1$ per month.
 
