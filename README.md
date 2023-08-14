@@ -1,6 +1,6 @@
 # ClickHouse in AWS Lambda
 
-This sample shows how to run the open-source online analytics database ClickHouse in an AWS Lambda function.
+This sample shows how to run the open-source online analytics database [ClickHouse](https://github.com/ClickHouse/ClickHouse) in an AWS Lambda function.
 
 It enables ad-hoc querying of existing data in Amazon S3 buckets with ClickHouse SQL using a simple HTTP client, without the need to run clickhouse-local on your computer or to deploy a ClickHouse cluster.
 
