@@ -106,7 +106,7 @@ This version has the following limitations that we plan to address in future:
 The main difference from clickhouse-local is that the sample does not run clickhouse query engine on the client device and does not transfer raw data from the S3 bucket to the client. That's why some interesting use-cases for the sample are:
 - Slow client devices. AWS Lambda [supports](https://aws.amazon.com/about-aws/whats-new/2020/12/aws-lambda-supports-10gb-memory-6-vcpu-cores-lambda-functions/) up to 10 GB of memory and 6 vCPU, which is more than an entry-level laptop might have.
 - Mobile devices. You can query massive data in S3 from mobile devices using HTTPS client applications or web clients like postman.
-- Slow network connection. AWS Lambda runs close to you data stored in S3. Only query results will be transferred to the client. That's why it can run queries faster than clickhouse-local and save traffic. 
+- Slow network connection. AWS Lambda runs close to you data stored in S3. Only query results will be transferred to the client. That's why it can run queries faster than clickhouse-local and saves traffic. 
 - Advanced authentication scenarios, when users shouldn't have AWS credentials and IAM permissions to access S3 data.
 - No-effort data lake :-)
 
@@ -128,7 +128,7 @@ The overall price depends on the volume of data, the number and type of queries.
 The cost to deploy the sample and run several queries on provided test data should be under 1$ per month.
 
 ## Q: How to make clickhouse binary run (better) in AWS Lambda?
-Pre-built ClickHouse binaries should work in AWS Lambda environment without additional patches starting from the release [v23.8.1(?)](). To reduce Lambda container image size and Lambda function cold start times, you can build a custom ClickHouse binary with only neccessary components (basically, -DENABLE_CLICKHOUSE_LOCAL=ON).
+To reduce Lambda container image size and Lambda function cold start times, you can build a custom ClickHouse binary with only neccessary components (basically, -DENABLE_CLICKHOUSE_LOCAL=ON).
 
 # Security
 
