@@ -9,7 +9,7 @@ The sample can also help to build other serverless solutions around ClickHouse q
 ![postman-example](./postman.gif)
 
 # Quick start
-1. Have docker and [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) installed and configured.
+1. Have docker and [AWS Command Line Interface (AWS CLI)](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) installed and configured.
 1. Clone the repo.
 1. Install and bootstrap AWS Cloud Development Kit (AWS CDK) - more details [here](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_install).
     ```
@@ -20,7 +20,7 @@ The sample can also help to build other serverless solutions around ClickHouse q
     ```
     npm install
     ```
-1. Set the USER_ARN environmental variable to an ARN of the AWS IAM user that will be granted permission to run queries. To set it to your default AWS CLI user:
+1. Set USER_ARN environmental variable to the Amazon Resource Name (ARN) of the AWS IAM user that will be granted permission to run queries. To set it to your default AWS CLI user:
     ```
     export USER_ARN=`aws sts get-caller-identity | jq -r .Arn`
     ```
@@ -33,7 +33,7 @@ The sample can also help to build other serverless solutions around ClickHouse q
     ```
     https://<...>.lambda-url.eu-central-1.on.aws/clickhouselambdastack-clickhousebucket<...>/test.csv
     ```
-1. Issue an HTTP POST request signed with AWS [Signature Version 4](#q-what-is-aws-signature-version-4-and-how-to-sign-requests-with-it) to this URL.
+1. Issue an HTTP POST request signed with [AWS Signature Version 4](#q-what-is-aws-signature-version-4-and-how-to-sign-requests-with-it) to this URL.
 Pass your SQL statement as a plain text in the request body.  Use a pre-defined name `table` in all SQL statemetns.  For example, with curl:
     ```
     curl 'https://<...>.lambda-url.eu-central-1.on.aws/clickhouselambdastack-clickhousebucket<...>/test.csv'
@@ -57,7 +57,7 @@ The sample includes a Lambda Function with the Lambda Function URL enabled, an I
 
 Data resides in the **S3 bucket**. You can upload any additional data in formats, supported by ClickHouse (parquet, json, csv and [many others](https://clickhouse.com/docs/en/interfaces/formats)).
 
-**The Lambda function URL** provides an easy way to invoke Lambda function without Amazon API Gateway. It uses AWS_IAM auth type, so all requests need to be signed with AWS Signature Version 4. You could change it to NONE to disable auth on the Lambda function URL side completely (this might impose a security risk!) or implement authentication of your choice in the Lambda code, through Amazon API Gateway or Amazon CloudFront.
+**The Lambda function URL** provides an easy way to invoke the Lambda function without Amazon API Gateway. It uses AWS_IAM auth type, so all requests need to be signed with AWS Signature Version 4. You could change it to NONE to disable authentication on the Lambda function URL side completely (this might impose a security risk!) or implement authentication of your choice in the Lambda code, through Amazon API Gateway or Amazon CloudFront.
 
 Permissions to invoke the Lambda function URL are granted through the **IAM user identity policy**. The sample grants access to only one user specified during deployment through the IAM_USER environmental variable. Another way to grant access is through the Lambda function's resource policy.
 
