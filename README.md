@@ -53,7 +53,7 @@ Check the [guide](#issue-queries) for more querying options.
 
 The sample includes a Lambda Function with the Lambda Function URL enabled, an IAM user identity policy, a Lambda function execution role, and an S3 bucket.
 
-**The Lambda function** processes HTTP requests and runs ClickHouse binary. It has 2048MB memory by default. The memory size can be increased up to 10240 MB. More memory can improve query performance, but also increases cost. The Lambda code is deployed using container image, because of clickhouse binary size. We use a standard clickhouse binary, see [the docs](#q-how-to-make-clickhouse-binary-run-better-in-aws-lambda) for ideas how to optimize it for the AWS Lambda environment.
+**The Lambda function** processes HTTP requests and runs ClickHouse binary. It has 2048MB memory by default. The memory size can be increased up to 10240 MB. More memory can improve query performance, but also increases cost. The Lambda code is deployed using container image stored in Amazon Elastic Container Registry (ECR), because of clickhouse binary size. We use a standard clickhouse binary, see [the docs](#q-how-to-make-clickhouse-binary-run-better-in-aws-lambda) for ideas how to optimize it for the AWS Lambda environment.
 
 Data resides in the **S3 bucket**. You can upload any additional data in formats, supported by ClickHouse (parquet, json, csv and [many others](https://clickhouse.com/docs/en/interfaces/formats)).
 
