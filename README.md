@@ -37,7 +37,6 @@ The sample can also help to build other serverless solutions around ClickHouse q
 Pass your SQL statement as a plain text in the request body.  Use a pre-defined name `table` in all SQL statemetns.  For example, with curl:
     ```
     curl 'https://<...>.lambda-url.eu-central-1.on.aws/clickhouselambdastack-clickhousebucket<...>/test.csv'
-        -X POST
         --aws-sigv4 "aws:amz:eu-central-1:lambda"
         -u '<AWS_ACCESS_KEY>:<AWS_SECRET_KEY>'
         -d 'SELECT * FROM table LIMIT 5;'
