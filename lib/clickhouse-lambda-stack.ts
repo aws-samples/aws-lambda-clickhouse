@@ -57,7 +57,7 @@ export class ClickhouseLambdaStack extends cdk.Stack {
         },
         timeout: cdk.Duration.seconds(300),
         memorySize: 2048,
-        architecture: lambda.Architecture.X86_64,
+        architecture: lambda.Architecture.ARM_64,
         logRetention: RetentionDays.ONE_WEEK,
       }
     );
