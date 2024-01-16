@@ -7,7 +7,7 @@ RUN npm run build:app
 
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023 as downloader
 WORKDIR /tmp
-RUN curl -LO https://github.com/ClickHouse/ClickHouse/releases/download/v23.8.2.7-lts/clickhouse-common-static-23.8.2.7-arm64.tgz \
+RUN curl -LO https://github.com/ClickHouse/ClickHouse/releases/download/v23.8.9.54-lts/clickhouse-common-static-23.8.9.54-arm64.tgz \
     && mkdir clickhouse_bin \
     && dnf install tar gzip -y \
     && tar xzf clickhouse-common-static-23.8.2.7-arm64.tgz -C clickhouse_bin --strip-components=1
