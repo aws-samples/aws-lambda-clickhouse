@@ -18,10 +18,10 @@ export class ClickhouseLambdaStack extends cdk.Stack {
     const bucketName = process.env.BUCKET_NAME ?? "clickhouse-bucket";
     let clickhouseBucket;
     if (userArn === "") {
-       console.error(
-         "USER_ARN is required.\nPlease set USER_ARN env variable to your IAM user ARN"
-       );
-       process.exit(1);
+      console.error(
+        "USER_ARN is required.\nPlease set USER_ARN env variable to your IAM user ARN"
+      );
+      process.exit(1);
     }
 
     const user = iam.User.fromUserArn(this, "User", userArn);
@@ -63,6 +63,7 @@ export class ClickhouseLambdaStack extends cdk.Stack {
     );
     const clickhouseLambdaUrl = clickhouseLambda.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.AWS_IAM,
+      invokeMode: lambda.InvokeMode.RESPONSE_STREAM,
     });
     clickhouseLambdaUrl.grantInvokeUrl(user);
     clickhouseBucket.grantReadWrite(clickhouseLambda);

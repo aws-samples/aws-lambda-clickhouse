@@ -6,6 +6,10 @@ import {
   APIGatewayProxyEventV2,
 } from "aws-lambda";
 import { ClickHouseRunner, LogLevel } from "./clickhouse_runner";
+import { streamifyResponse, ResponseStream } from "lambda-stream";
+import { pipeline } from "stream";
+import { promisify } from "util";
+const pipelineAsync = promisify(pipeline);
 
 const region = process.env.REGION ?? "us-east-1";
 const bucketName = process.env.BUCKET_NAME ?? "clickhouse-bucket";
@@ -13,10 +17,10 @@ const binaryPath = process.env.BINARY_PATH ?? "./clickhouse";
 const logLevel: LogLevel = (process.env.LOG_LEVEL ??
   ("INFO" as LogLevel)) as LogLevel;
 
-export const handler = async (
+const clickHouseHandler = async (
   event: APIGatewayProxyEventV2,
-  context: Context
-): Promise<APIGatewayProxyResultV2> => {
+  responseStream: ResponseStream
+): Promise<void> => {
   const path = event.requestContext.http.path ?? "/test.csv";
   // if bucketname is already part of the URL, remove it
   let objectPath = "";
@@ -44,17 +48,7 @@ export const handler = async (
     binaryPath,
   };
   const clickhouseRunner = new ClickHouseRunner(clickhouseRunnerParams);
-  console.log(event.requestContext);
-  try {
-    const result = await clickhouseRunner.run();
-    return {
-      statusCode: 200,
-      body: String(result),
-    };
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: String(error),
-    };
-  }
+  await pipeline(clickhouseRunner.run().stdout, responseStream);
 };
+
+export const handler = streamifyResponse(clickHouseHandler);

@@ -1,6 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-import { exec } from "child_process";
+import { spawn, ChildProcessWithoutNullStreams } from "child_process";
 
 // Log Levels for ClickHouseRunner
 export type LogLevel = "ERROR" | "WARN" | "INFO" | "DEBUG";
@@ -35,30 +35,70 @@ export class ClickHouseRunner {
 
   // Run ClickHouse
   // TODO:  implement with spawn to work with large data and stream
-  public async run(): Promise<string> {
+  // public async run(): Promise<string> {
+  //   const command = this.buildCommand();
+  //   console.log(`COMMAND ${command[0]} ${command.slice(1).join(" ")}`);
+  //   return new Promise((resolve, reject) => {
+  //     exec(command.join(" "), (error, stdout, stderr) => {
+  //       if (error) {
+  //         console.error(`exec error: ${error}`);
+  //         reject(error);
+  //       }
+  //       // do not reject on stderr need to configure ClickHouse to log to stdout
+  //       if (stderr) {
+  //         console.log(`stderr: ${stderr}`);
+  //         //reject(stderr);
+  //       }
+  //       console.log(`stdout: ${stdout}`);
+  //       resolve(stdout);
+  //     });
+  //   });
+  // }
+  // public async run(): Promise<string> {
+  //   const command = this.buildCommand();
+  //   console.log(`COMMAND ${command[0]} ${command.slice(1).join(" ")}`);
+  //   return new Promise((resolve, reject) => {
+  //     const child = spawn(command[0], command.slice(1), { shell: true });
+  //     let stdout = "";
+  //     let stderr = "";
+  //     child.stdout.on("data", (data: Buffer) => {
+  //       stdout += data.toString();
+  //     });
+  //     child.stderr.on("data", (data: Buffer) => {
+  //       stderr += data.toString();
+  //     });
+  //     child.on("close", (code: number) => {
+  //       if (code === 0) {
+  //         resolve(stdout);
+  //       } else {
+  //         reject(new Error(stderr || "spawnAsync error without stderr output"));
+  //       }
+  //     });
+  //     child.on("error", (error: Error) => {
+  //       reject(error);
+  //     });
+  //   });
+  // }
+  public run(): ChildProcessWithoutNullStreams {
     const command = this.buildCommand();
-    return new Promise((resolve, reject) => {
-      exec(command, (error, stdout, stderr) => {
-        if (error) {
-          console.error(`exec error: ${error}`);
-          reject(error);
-        }
-        // do not reject on stderr need to configure ClickHouse to log to stdout
-        if (stderr) {
-          console.log(`stderr: ${stderr}`);
-          //reject(stderr);
-        }
-        console.log(`stdout: ${stdout}`);
-        resolve(stdout);
-      });
+    console.log(`COMMAND ${command[0]} ${command.slice(1).join(" ")}`);
+    const child = spawn(command[0], command.slice(1), {
+      shell: true,
+      stdio: "pipe",
     });
+    return child;
   }
 
   // Build ClickHouse command
-  private buildCommand(): string {
+  private buildCommand(): string[] {
     const query = this.buildQuery();
-    const command = `${this.binaryPath} local --query="${query}" --logger.level="${this.logLevel}" --logger.console`;
-    //const command = `${this.binaryPath} local --query="${query}"`;
+    const command = [
+      `${this.binaryPath}`,
+      "local",
+      `--query="${query}"`,
+      `--logger.level="${this.logLevel}"`,
+      "--logger.console",
+    ];
     return command;
   }
 
