@@ -1,0 +1,26 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ClickHouseLambdaInvokePermission",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:InvokeFunctionUrl"
+      ],
+      "Resource": [
+        "arn:aws:lambda:*:*:function:ClickhouseLambdaStack-ClickhouseLambda*"
+      ]
+    },
+    {
+      "Sid": "ClickHouseLambdaDescribePermission",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:GetFunctionUrlConfig",
+        "lambda:GetFunction"
+      ],
+      "Resource": [
+        "arn:aws:lambda:*:*:function:ClickhouseLambdaStack-ClickhouseLambda*"
+      ]
+    }
+  ]
+}
