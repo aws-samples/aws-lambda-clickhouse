@@ -15,8 +15,8 @@ export interface ClickHouseRunnerParams {
   binaryPath: string;
 }
 
-// Runner Class for ClickHouse loacal
-export class ClickHouseRunner {
+// Enhanced Runner Class for ClickHouse local with HTTPS support
+export class ClickHouseRunnerEnhanced {
   private readonly bucketName: string;
   private readonly objectKey: string;
   private readonly bucketRegion: string;
@@ -34,7 +34,6 @@ export class ClickHouseRunner {
   }
 
   // Run ClickHouse
-  // TODO:  implement with spawn to work with large data and stream
   public async run(): Promise<string> {
     const command = this.buildCommand();
     return new Promise((resolve, reject) => {
@@ -58,51 +57,56 @@ export class ClickHouseRunner {
   private buildCommand(): string {
     const query = this.buildQuery();
     const command = `${this.binaryPath} local --query="${query}" --logger.level="${this.logLevel}" --logger.console`;
-    //const command = `${this.binaryPath} local --query="${query}"`;
     return command;
   }
 
-  // Build ClickHouse query - Enhanced with HTTPS URL support
+  // Enhanced Build ClickHouse query with HTTPS support
   private buildQuery(): string {
-    const uri = this.buildS3Uri();
-    let tableFunction;
-    
-    if (uri.includes('.s3.') || uri.startsWith('s3://')) {
-      // S3 URLs use s3() function
-      tableFunction = `s3('${uri}')`;
-    } else if (uri.startsWith('https://') || uri.startsWith('http://')) {
-      // HTTPS URLs use url() function with format detection
-      if (uri.includes('.csv')) {
-        tableFunction = `url('${uri}', 'CSVWithNames')`;
-      } else {
-        tableFunction = `url('${uri}', 'CSV')`;
-      }
-    } else {
-      // Fallback to s3()
-      tableFunction = `s3('${uri}')`;
-    }
-    
-    const query = `CREATE TABLE table AS ${tableFunction}; ${this.queryStatement}`;
+    const dataUri = this.buildDataUri();
+    const query = `CREATE TABLE table AS ${this.getTableFunction(dataUri)}; ${this.queryStatement}`;
     return query;
   }
 
-  // Build S3 URI - Enhanced with HTTPS URL support
-  private buildS3Uri(): string {
-    // Check if objectKey contains a full HTTPS URL (encoded or not)
+  // Build data URI - supports both S3 and HTTPS URLs
+  private buildDataUri(): string {
+    // Check if objectKey is a full HTTPS URL (encoded or not)
     const decodedKey = decodeURIComponent(this.objectKey);
     
     if (decodedKey.startsWith('https://') || decodedKey.startsWith('http://')) {
-      // Direct HTTPS URL - return as-is
+      // Direct HTTPS URL
       return decodedKey;
     } else if (this.objectKey.includes('raw.githubusercontent.com') || 
                this.objectKey.includes('archive.ics.uci.edu') ||
-               this.objectKey.includes('data.gov')) {
-      // HTTPS URL without protocol - add https://
+               this.objectKey.includes('data.gov') ||
+               this.objectKey.includes('kaggle.com')) {
+      // Looks like an HTTPS URL without the protocol, add https://
       return `https://${this.objectKey}`;
     } else {
       // Traditional S3 URL
-      const s3Uri = `https://${this.bucketName}.s3.${this.bucketRegion}.amazonaws.com/${this.objectKey}`;
-      return s3Uri;
+      return `https://${this.bucketName}.s3.${this.bucketRegion}.amazonaws.com/${this.objectKey}`;
+    }
+  }
+
+  // Determine the appropriate ClickHouse table function based on URI
+  private getTableFunction(uri: string): string {
+    if (uri.startsWith('https://') || uri.startsWith('http://')) {
+      // For HTTPS URLs, use url() function with format detection
+      if (uri.includes('.csv')) {
+        return `url('${uri}', 'CSVWithNames')`;
+      } else if (uri.includes('.tsv')) {
+        return `url('${uri}', 'TSVWithNames')`;
+      } else if (uri.includes('.json')) {
+        return `url('${uri}', 'JSONEachRow')`;
+      } else {
+        // Default to CSV for unknown formats
+        return `url('${uri}', 'CSV')`;
+      }
+    } else {
+      // For S3 URLs, use s3() function
+      return `s3('${uri}')`;
     }
   }
 }
+
+// Legacy wrapper for backward compatibility
+export class ClickHouseRunner extends ClickHouseRunnerEnhanced {}
