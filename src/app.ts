@@ -17,13 +17,18 @@ export const handler = async (
   event: APIGatewayProxyEventV2,
   context: Context
 ): Promise<APIGatewayProxyResultV2> => {
-  const path = event.requestContext.http.path ?? "/test.csv";
+  const path = event.rawPath ?? event.requestContext.http.path ?? "/test.csv";
   // if bucketname is already part of the URL, remove it
   let objectPath = "";
   if (path.startsWith("/" + bucketName)) {
     objectPath = path.replace("/" + bucketName, "");
   } else {
     objectPath = path;
+  }
+  
+  // Remove leading slash if present
+  if (objectPath.startsWith("/")) {
+    objectPath = objectPath.substring(1);
   }
   const method = event.requestContext.http.method ?? "GET";
   let statement = "";

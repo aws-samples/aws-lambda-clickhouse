@@ -89,7 +89,11 @@ export class ClickHouseRunnerEnhanced {
 
   // Determine the appropriate ClickHouse table function based on URI
   private getTableFunction(uri: string): string {
-    if (uri.startsWith('https://') || uri.startsWith('http://')) {
+    // Check if this is an S3 URL (contains .s3. and .amazonaws.com)
+    if (uri.includes('.s3.') && uri.includes('.amazonaws.com')) {
+      // For S3 URLs, use s3() function
+      return `s3('${uri}')`;
+    } else if (uri.startsWith('https://') || uri.startsWith('http://')) {
       // For HTTPS URLs, use url() function with format detection
       if (uri.includes('.csv')) {
         return `url('${uri}', 'CSVWithNames')`;
@@ -102,7 +106,7 @@ export class ClickHouseRunnerEnhanced {
         return `url('${uri}', 'CSV')`;
       }
     } else {
-      // For S3 URLs, use s3() function
+      // Fallback to s3() function
       return `s3('${uri}')`;
     }
   }
