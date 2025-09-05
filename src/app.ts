@@ -5,7 +5,7 @@ import {
   APIGatewayProxyResultV2,
   APIGatewayProxyEventV2,
 } from "aws-lambda";
-import { ClickHouseRunner, LogLevel } from "./clickhouse_runner";
+import { ClickHouseRunnerEnhanced, LogLevel } from "./clickhouse_runner_enhanced";
 
 const region = process.env.REGION ?? "us-east-1";
 const bucketName = process.env.BUCKET_NAME ?? "clickhouse-bucket";
@@ -43,7 +43,7 @@ export const handler = async (
     logLevel: logLevel,
     binaryPath,
   };
-  const clickhouseRunner = new ClickHouseRunner(clickhouseRunnerParams);
+  const clickhouseRunner = new ClickHouseRunnerEnhanced(clickhouseRunnerParams);
   console.log(event.requestContext);
   try {
     const result = await clickhouseRunner.run();
