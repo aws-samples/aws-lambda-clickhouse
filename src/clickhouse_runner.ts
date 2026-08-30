@@ -62,16 +62,47 @@ export class ClickHouseRunner {
     return command;
   }
 
-  // Build ClickHouse query
+  // Build ClickHouse query - Enhanced with HTTPS URL support
   private buildQuery(): string {
-    const s3Uri = this.buildS3Uri();
-    const query = `CREATE TABLE table AS s3('${s3Uri}'); ${this.queryStatement}`;
+    const uri = this.buildS3Uri();
+    let tableFunction;
+    
+    if (uri.includes('.s3.') || uri.startsWith('s3://')) {
+      // S3 URLs use s3() function
+      tableFunction = `s3('${uri}')`;
+    } else if (uri.startsWith('https://') || uri.startsWith('http://')) {
+      // HTTPS URLs use url() function with format detection
+      if (uri.includes('.csv')) {
+        tableFunction = `url('${uri}', 'CSVWithNames')`;
+      } else {
+        tableFunction = `url('${uri}', 'CSV')`;
+      }
+    } else {
+      // Fallback to s3()
+      tableFunction = `s3('${uri}')`;
+    }
+    
+    const query = `CREATE TABLE table AS ${tableFunction}; ${this.queryStatement}`;
     return query;
   }
 
-  // Build S3 URI
+  // Build S3 URI - Enhanced with HTTPS URL support
   private buildS3Uri(): string {
-    const s3Uri = `https://${this.bucketName}.s3.${this.bucketRegion}.amazonaws.com/${this.objectKey}`;
-    return s3Uri;
+    // Check if objectKey contains a full HTTPS URL (encoded or not)
+    const decodedKey = decodeURIComponent(this.objectKey);
+    
+    if (decodedKey.startsWith('https://') || decodedKey.startsWith('http://')) {
+      // Direct HTTPS URL - return as-is
+      return decodedKey;
+    } else if (this.objectKey.includes('raw.githubusercontent.com') || 
+               this.objectKey.includes('archive.ics.uci.edu') ||
+               this.objectKey.includes('data.gov')) {
+      // HTTPS URL without protocol - add https://
+      return `https://${this.objectKey}`;
+    } else {
+      // Traditional S3 URL
+      const s3Uri = `https://${this.bucketName}.s3.${this.bucketRegion}.amazonaws.com/${this.objectKey}`;
+      return s3Uri;
+    }
   }
 }

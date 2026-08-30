@@ -5,7 +5,7 @@ import {
   APIGatewayProxyResultV2,
   APIGatewayProxyEventV2,
 } from "aws-lambda";
-import { ClickHouseRunner, LogLevel } from "./clickhouse_runner";
+import { ClickHouseRunnerEnhanced, LogLevel } from "./clickhouse_runner_enhanced";
 
 const region = process.env.REGION ?? "us-east-1";
 const bucketName = process.env.BUCKET_NAME ?? "clickhouse-bucket";
@@ -17,13 +17,18 @@ export const handler = async (
   event: APIGatewayProxyEventV2,
   context: Context
 ): Promise<APIGatewayProxyResultV2> => {
-  const path = event.requestContext.http.path ?? "/test.csv";
+  const path = event.rawPath ?? event.requestContext.http.path ?? "/test.csv";
   // if bucketname is already part of the URL, remove it
   let objectPath = "";
   if (path.startsWith("/" + bucketName)) {
     objectPath = path.replace("/" + bucketName, "");
   } else {
     objectPath = path;
+  }
+  
+  // Remove leading slash if present
+  if (objectPath.startsWith("/")) {
+    objectPath = objectPath.substring(1);
   }
   const method = event.requestContext.http.method ?? "GET";
   let statement = "";
@@ -43,7 +48,7 @@ export const handler = async (
     logLevel: logLevel,
     binaryPath,
   };
-  const clickhouseRunner = new ClickHouseRunner(clickhouseRunnerParams);
+  const clickhouseRunner = new ClickHouseRunnerEnhanced(clickhouseRunnerParams);
   console.log(event.requestContext);
   try {
     const result = await clickhouseRunner.run();
